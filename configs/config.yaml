@@ -1,0 +1,95 @@
+# Application Configuration
+
+database:
+  host: ${DB_HOST:localhost}
+  port: ${DB_PORT:5432}
+  name: ${DB_NAME:postgres}
+  max_connections: 100
+  connection_timeout: 30
+  
+  replication:
+    enabled: true
+    mode: async
+    lag_threshold: 30  # seconds
+  
+  backup:
+    enabled: true
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    retention_days: 30
+    type: full
+
+monitoring:
+  prometheus:
+    enabled: true
+    port: 9090
+    scrape_interval: 15s
+  
+  grafana:
+    enabled: true
+    port: 3000
+  
+  alerting:
+    enabled: true
+    channels:
+      - slack
+      - pagerduty
+    
+    rules:
+      - name: high_error_rate
+        threshold: 0.01  # 1%
+        duration: 5m
+      
+      - name: high_latency
+        threshold: 100  # ms
+        duration: 10m
+
+scaling:
+  auto_scaling:
+    enabled: true
+    min_replicas: 2
+    max_replicas: 10
+    target_cpu_utilization: 70
+    target_memory_utilization: 80
+
+security:
+  encryption:
+    at_rest: true
+    in_transit: true
+  
+  authentication:
+    method: iam
+    mfa_required: true
+  
+  secrets:
+    provider: vault
+    rotation_enabled: true
+    rotation_period_days: 90
+
+logging:
+  level: INFO
+  format: json
+  outputs:
+    - stdout
+    - file
+  
+  retention_days: 90
+  
+  structured:
+    enabled: true
+    fields:
+      - timestamp
+      - level
+      - service
+      - trace_id
+
+disaster_recovery:
+  rto_minutes: 15
+  rpo_minutes: 5
+  
+  backup_locations:
+    - region: us-west-2
+    - region: us-east-1
+  
+  failover:
+    automatic: true
+    health_check_interval: 10s
